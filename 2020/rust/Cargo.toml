@@ -1,0 +1,9 @@
+[package]
+name = "advent2020"
+version = "0.1.0"
+authors = ["Nick Meyer <nick@e3b0c442.io>"]
+edition = "2018"
+default-run = "advent2020"
+
+[dependencies]
+simple-error = "0.2"
