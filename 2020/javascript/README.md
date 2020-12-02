@@ -2,7 +2,7 @@
 
 ## Requirements
 
-* Node.js (tested on the latest LTS)
+* Node.js 14+ (modules support required)
 
 ## Running the entire suite
 
