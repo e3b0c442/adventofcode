@@ -3,6 +3,7 @@
 ## Requirements
 
 - A C compiler (gcc or clang) capable of standard C17
+- PCRE (not PCRE2)
 
 ## Running the entire suite
 
