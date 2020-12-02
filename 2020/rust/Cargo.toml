@@ -7,3 +7,5 @@ default-run = "advent2020"
 
 [dependencies]
 simple-error = "0.2"
+lazy_static = "1"
+regex = "1"
