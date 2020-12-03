@@ -12,5 +12,7 @@ func main() {
 		log.Fatal("No input path provided")
 	}
 
-	advent2020.Day1(os.Args[1])
+	if err := advent2020.Day1(os.Args[1]); err != nil {
+		log.Fatal(err)
+	}
 }

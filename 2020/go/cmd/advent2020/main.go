@@ -16,9 +16,12 @@ func main() {
 	funcs := []func(string) error{
 		advent2020.Day1,
 		advent2020.Day2,
+		advent2020.Day3,
 	}
 
 	for i, f := range funcs {
-		f(fmt.Sprintf("%s/%d.txt", os.Args[1], i+1))
+		if err := f(fmt.Sprintf("%s/%d.txt", os.Args[1], i+1)); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
