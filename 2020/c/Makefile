@@ -2,7 +2,7 @@ CC := gcc
 CCFLAGS := -Wall -g -pedantic -std=c17
 LDFLAGS := -lpcre
 
-DAYNUMS := 1 2
+DAYNUMS := 1 2 3
 DAYS := $(addprefix day, $(DAYNUMS))
 DAY_BINS := $(addprefix bin/, $(DAYS))
 DAY_OBJS := $(addprefix obj/, $(addsuffix .o, $(DAYS)))
