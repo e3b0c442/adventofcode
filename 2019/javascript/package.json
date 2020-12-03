@@ -1,0 +1,9 @@
+{
+  "name": "advent2019",
+  "version": "1.0.0",
+  "description": "Advent of Code - 2019",
+  "repository": "git+https://github.com/e3b0c442/adventofcode.git",
+  "author": "Nick Meyer <nick@e3b0c442.io>",
+  "license": "Unlicense",
+  "type": "module"
+}

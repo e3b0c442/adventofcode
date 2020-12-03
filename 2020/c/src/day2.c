@@ -9,12 +9,12 @@ static pcre *pass_re;
 
 static int part1(const char *input, size_t input_len)
 {
-    char **lines;
+    char **lines = NULL;
+    const char *min_s = NULL, *max_s = NULL, *ch = NULL, *pw = NULL;
+
     int line_count = input_to_lines(input, input_len, &lines);
     if (line_count < 0)
         goto err_cleanup;
-
-    const char *min_s, *max_s, *ch, *pw;
 
     int valid = 0;
     for (int i = 0; i < line_count; i++)
@@ -74,12 +74,12 @@ err_cleanup:
 
 static int part2(const char *input, size_t input_len)
 {
-    char **lines;
+    char **lines = NULL;
+    const char *l_s = NULL, *r_s = NULL, *ch = NULL, *pw = NULL;
+
     int line_count = input_to_lines(input, input_len, &lines);
     if (line_count < 0)
         goto err_cleanup;
-
-    const char *l_s, *r_s, *ch, *pw;
 
     int valid = 0;
     for (int i = 0; i < line_count; i++)
@@ -136,8 +136,13 @@ err_cleanup:
 int day2(const char *filename)
 {
     printf("Day 2: Password Philosophy\n");
+    char *input = NULL;
 
-    const char *err;
+    int filesize = read_file_to_buffer(&input, filename);
+    if (filesize < 0)
+        goto err_cleanup;
+
+    const char *err = NULL;
     int erroffset;
     pass_re = pcre_compile("(\\d+)-(\\d+) ([a-z]): (.*)", 0, &err, &erroffset, NULL);
     if (pass_re == NULL)
@@ -145,11 +150,6 @@ int day2(const char *filename)
         errno = EINVAL;
         goto err_cleanup;
     }
-
-    char *input;
-    int filesize = read_file_to_buffer(&input, filename);
-    if (filesize < 0)
-        goto err_cleanup;
 
     int rval = part1(input, filesize);
     if (rval < 0)

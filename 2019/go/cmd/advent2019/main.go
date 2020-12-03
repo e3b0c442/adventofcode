@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	advent2020 "github.com/e3b0c442/adventofcode/2020/go"
+	advent2019 "github.com/e3b0c442/adventofcode/2019/go"
 )
 
 func main() {
@@ -14,8 +14,7 @@ func main() {
 	}
 
 	funcs := []func(string) error{
-		advent2020.Day1,
-		advent2020.Day2,
+		advent2019.Day1,
 	}
 
 	for i, f := range funcs {

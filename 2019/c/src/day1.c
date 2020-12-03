@@ -37,52 +37,44 @@ err_cleanup:
     return -errno;
 }
 
+static int recurse_fuel(int val)
+{
+    return val / 3 - 2 <= 0 ? 0 : val / 3 - 2 + recurse_fuel(val / 3 - 2);
+}
+
 static int part1(const char *input, size_t input_len)
 {
-    int rval = -2;
-
-    int *entries;
-    int line_count = input_to_ints(input, input_len, &entries);
+    int *mods;
+    int line_count = input_to_ints(input, input_len, &mods);
     if (line_count < 0)
         return line_count;
 
+    int fuel = 0;
     for (int i = 0; i < line_count; i++)
-        for (int j = i + 1; j < line_count; j++)
-            if (entries[i] + entries[j] == 2020)
-            {
-                rval = entries[i] * entries[j];
-                goto cleanup;
-            }
-cleanup:
-    free(entries);
-    return rval;
+        fuel += mods[i] / 3 - 2;
+
+    //free(mods);
+    return fuel;
 }
 
 static int part2(const char *input, size_t input_len)
 {
-    int rval = -2;
-
-    int *entries;
-    int line_count = input_to_ints(input, input_len, &entries);
+    int *mods;
+    int line_count = input_to_ints(input, input_len, &mods);
     if (line_count < 0)
         return line_count;
 
+    int fuel = 0;
     for (int i = 0; i < line_count; i++)
-        for (int j = i + 1; j < line_count; j++)
-            for (int k = j + 1; k < line_count; k++)
-                if (entries[i] + entries[j] + entries[k] == 2020)
-                {
-                    rval = entries[i] * entries[j] * entries[k];
-                    goto cleanup;
-                }
-cleanup:
-    free(entries);
-    return rval;
+        fuel += recurse_fuel(mods[i]);
+
+    free(mods);
+    return fuel;
 }
 
 int day1(const char *filename)
 {
-    printf("Day 1: Report Repair\n");
+    printf("Day 1: The Tyranny of the Rocket Equation\n");
 
     char *input;
     int filesize = read_file_to_buffer(&input, filename);
@@ -91,15 +83,25 @@ int day1(const char *filename)
 
     int rval = part1(input, filesize);
     if (rval < 0)
-        return rval;
+    {
+        errno = -rval;
+        goto err_cleanup;
+    }
     printf("\tPart 1: %d\n", rval);
 
     rval = part2(input, filesize);
     if (rval < 0)
-        return rval;
+    {
+        errno = -rval;
+        goto err_cleanup;
+    }
     printf("\tPart 2: %d\n", rval);
 
     free(input);
-
     return 0;
+
+err_cleanup:
+    if (input != NULL)
+        free(input);
+    return -errno;
 }
