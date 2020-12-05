@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -13,12 +12,5 @@ func main() {
 		log.Fatal("No input path provided")
 	}
 
-	funcs := []func(string) error{
-		advent2019.Day1,
-		advent2019.Day2,
-	}
-
-	for i, f := range funcs {
-		f(fmt.Sprintf("%s/%d.txt", os.Args[1], i+1))
-	}
+	advent2019.Day2(os.Args[1])
 }
