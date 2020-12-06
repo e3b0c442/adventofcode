@@ -18,6 +18,7 @@ func main() {
 		advent2020.Day2,
 		advent2020.Day3,
 		advent2020.Day4,
+		advent2020.Day5,
 	}
 
 	for i, f := range funcs {
