@@ -15,29 +15,27 @@ def day5(input_file):
 def __part1(input):
     ids = []
     for line in input.splitlines():
-        rows = list(range(128))
+        row = [0, 127]
         for rpart in line[:7]:
-            split = len(rows) // 2
+            split = (row[1] + 1 - row[0]) // 2
             if rpart == "F":
-                rows = rows[:split]
+                row[1] -= split
             elif rpart == "B":
-                rows = rows[split:]
+                row[0] += split
             else:
                 raise Exception("Invalid input")
-        row = rows[0]
 
-        cols = list(range(8))
+        col = [0, 7]
         for cpart in line[7:]:
-            split = len(cols) // 2
+            split = (col[1] + 1 - col[0]) // 2
             if cpart == "L":
-                cols = cols[:split]
+                col[1] -= split
             elif cpart == "R":
-                cols = cols[split:]
+                col[0] += split
             else:
                 raise Exception("Invalid input")
-        col = cols[0]
 
-        id = row * 8 + col
+        id = row[0] * 8 + col[0]
         ids.append(id)
 
     ids.sort()

@@ -19,30 +19,26 @@ pub fn day5(input_file: &str) -> Result<(), Box<dyn Error>> {
 fn part1(input: &str) -> Result<Vec<i32>, Box<dyn Error>> {
     let mut ids: Vec<i32> = Vec::new();
     for line in input.lines() {
-        let rowvec = (0..128).collect::<Vec<i32>>();
-        let mut rows: &[i32] = rowvec.as_slice();
+        let mut row = (0, 127);
         for c in line[0..7].chars() {
-            let split = rows.len() / 2;
+            let split = (row.1 + 1 - row.0) / 2;
             match c {
-                'F' => rows = &rows[0..split],
-                'B' => rows = &rows[split..],
+                'F' => row.1 -= split,
+                'B' => row.0 += split,
                 _ => return Err(Box::new(SimpleError::new("Invalid input"))),
             }
         }
-        let row = rows[0];
 
-        let colvec = (0..8).collect::<Vec<i32>>();
-        let mut cols: &[i32] = colvec.as_slice();
+        let mut col = (0, 7);
         for c in line[7..].chars() {
-            let split = cols.len() / 2;
+            let split = (col.1 + 1 - col.0) / 2;
             match c {
-                'L' => cols = &cols[0..split],
-                'R' => cols = &cols[split..],
+                'L' => col.1 -= split,
+                'R' => col.0 += split,
                 _ => return Err(Box::new(SimpleError::new("Invalid input"))),
             }
         }
-        let col = cols[0];
-        ids.push(row * 8 + col);
+        ids.push(row.0 * 8 + col.0);
     }
     ids.sort();
     Ok(ids)

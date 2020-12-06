@@ -29,47 +29,37 @@ func Day5(inputFile string) error {
 	return nil
 }
 
-func rangeSlice(lo, hi int) []int {
-	ints := make([]int, hi-lo)
-	for i := lo; i < hi; i++ {
-		ints[i] = i
-	}
-	return ints
-}
-
 func day5Part1(input string) ([]int, error) {
 	lines := strings.Split(input, "\n")
 	ids := make([]int, len(lines))
 
 	for i, line := range lines {
-		rows := rangeSlice(0, 128)
+		row := []int{0, 127}
 		for _, c := range line[:7] {
-			split := len(rows) / 2
+			split := (row[1] + 1 - row[0]) / 2
 			switch c {
 			case 'F':
-				rows = rows[:split]
+				row[1] -= split
 			case 'B':
-				rows = rows[split:]
+				row[0] += split
 			default:
 				return nil, fmt.Errorf("Invalid input %s", line)
 			}
 		}
-		row := rows[0]
 
-		cols := rangeSlice(0, 8)
+		col := []int{0, 7}
 		for _, c := range line[7:] {
-			split := len(cols) / 2
+			split := (col[1] + 1 - col[0]) / 2
 			switch c {
 			case 'L':
-				cols = cols[:split]
+				col[1] -= split
 			case 'R':
-				cols = cols[split:]
+				col[0] += split
 			default:
 				return nil, fmt.Errorf("Invalid input %s", line)
 			}
 		}
-		col := cols[0]
-		ids[i] = row*8 + col
+		ids[i] = row[0]*8 + col[0]
 	}
 	sort.Ints(ids)
 	return ids, nil

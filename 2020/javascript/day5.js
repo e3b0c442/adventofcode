@@ -6,38 +6,37 @@ const part1 = (input) => {
   return input
     .split("\n")
     .map((p) => {
-      let rows = [...Array(128).keys()];
+      let row = [0, 127]
       for (let c of p.slice(0, 7)) {
-        const split = rows.length / 2;
+        const split = (row[1] + 1 - row[0]) / 2;
         switch (c) {
           case "F":
-            rows = rows.slice(0, split);
+            row[1] -= split
             break;
           case "B":
-            rows = rows.slice(split);
+            row[0] += split
             break;
           default:
             throw "Invalid input";
         }
       }
-      const row = parseInt(rows[0]);
 
-      let cols = [...Array(8).keys()];
+      let col = [0, 7];
       for (let c of p.slice(7)) {
-        const split = cols.length / 2;
+        const split = (col[1] + 1 - col[0]) / 2;
         switch (c) {
           case "L":
-            cols = cols.slice(0, split);
+            col[1] -= split
             break;
           case "R":
-            cols = cols.slice(split);
+            col[0] += split
             break;
           default:
             throw "Invalid input";
         }
       }
-      const col = parseInt(cols[0]);
-      return row * 8 + col;
+
+      return row[0] * 8 + col[0];
     })
     .sort((a, b) => a - b);
 };
