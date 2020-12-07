@@ -4,62 +4,6 @@
 #include <string.h>
 #include "lib.h"
 
-static int input_to_records(const char *input, size_t input_len, char ***output)
-{
-    //copy the input buffer so we don't mangle the original
-    char input_cpy[input_len + 1];
-    memcpy(input_cpy, input, input_len + 1);
-
-    //get the number of records to appropriately size the array
-    int record_count = 1;
-    for (int i = 0; i < input_len - 1; i++)
-        if (input_cpy[i] == '\n' && input_cpy[i + 1] == '\n')
-            record_count++;
-
-    //allocate the lines buffer
-    char **records = calloc(record_count, sizeof(char *));
-    if (records == NULL)
-        goto err_cleanup;
-
-    //tokenize the string manually because of the multichar delimiter
-    int cursor = 0;
-    int ix = 0;
-    for (int i = 0; i < input_len; i++)
-    {
-        if (input_cpy[i] == '\n' && input_cpy[i + 1] == '\n')
-        {
-            input_cpy[i] = '\0';
-            input_cpy[i + 1] = '\0';
-            i++;
-            char *record = calloc(i - cursor, sizeof(char));
-            if (record == NULL)
-                goto err_cleanup;
-            memcpy(record, input_cpy + cursor, i - cursor);
-            records[ix] = record;
-            ix++;
-            cursor = i + 1;
-        }
-    }
-    char *record = calloc(input_len + 1 - cursor, sizeof(char));
-    if (record == NULL)
-        goto err_cleanup;
-    memcpy(record, input_cpy + cursor, input_len + 1 - cursor);
-    records[ix] = record;
-
-    //replace remaining newlines with spaces
-    for (int i = 0; i < record_count; i++)
-        for (int j = 0; j < strlen(records[i]); j++)
-            if (records[i][j] == '\n')
-                records[i][j] = ' ';
-
-    *output = records;
-    return record_count;
-
-err_cleanup:
-    free_lines(records, record_count);
-    return -errno;
-}
-
 static esht *record_to_passport(const char *input)
 {
     //copy the input buffer so we don't mangle the original
@@ -108,6 +52,12 @@ static int part1(const char *input, size_t input_len)
     if (records_count < 0)
         goto err_cleanup;
 
+    //replace remaining newlines with spaces
+    for (int i = 0; i < records_count; i++)
+        for (int j = 0; j < strlen(records[i]); j++)
+            if (records[i][j] == '\n')
+                records[i][j] = ' ';
+
     char *fields[] = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"};
     const int fields_count = 7;
     int valid = 0;
@@ -140,6 +90,12 @@ static int part2(const char *input, size_t input_len)
     int records_count = input_to_records(input, input_len, &records);
     if (records_count < 0)
         goto err_cleanup;
+
+    //replace remaining newlines with spaces
+    for (int i = 0; i < records_count; i++)
+        for (int j = 0; j < strlen(records[i]); j++)
+            if (records[i][j] == '\n')
+                records[i][j] = ' ';
 
     int valid = 0;
     char *field = NULL;

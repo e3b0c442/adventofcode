@@ -53,6 +53,56 @@ err_cleanup:
     return -errno;
 }
 
+int input_to_records(const char *input, size_t input_len, char ***output)
+{
+    //copy the input buffer so we don't mangle the original
+    char input_cpy[input_len + 1];
+    memcpy(input_cpy, input, input_len + 1);
+
+    //get the number of records to appropriately size the array
+    int record_count = 1;
+    for (int i = 0; i < input_len - 1; i++)
+        if (input_cpy[i] == '\n' && input_cpy[i + 1] == '\n')
+            record_count++;
+
+    //allocate the lines buffer
+    char **records = calloc(record_count, sizeof(char *));
+    if (records == NULL)
+        goto err_cleanup;
+
+    //tokenize the string manually because of the multichar delimiter
+    int cursor = 0;
+    int ix = 0;
+    for (int i = 0; i < input_len; i++)
+    {
+        if (input_cpy[i] == '\n' && input_cpy[i + 1] == '\n')
+        {
+            input_cpy[i] = '\0';
+            input_cpy[i + 1] = '\0';
+            i++;
+            char *record = calloc(i - cursor, sizeof(char));
+            if (record == NULL)
+                goto err_cleanup;
+            memcpy(record, input_cpy + cursor, i - cursor);
+            records[ix] = record;
+            ix++;
+            cursor = i + 1;
+        }
+    }
+    char *record = calloc(input_len + 1 - cursor, sizeof(char));
+    if (record == NULL)
+        goto err_cleanup;
+    memcpy(record, input_cpy + cursor, input_len + 1 - cursor);
+    records[ix] = record;
+
+    *output = records;
+    return record_count;
+
+err_cleanup:
+    free_lines(records, record_count);
+    return -errno;
+}
+
 int read_file_to_buffer(char **buf, const char *filename)
 {
     *buf = NULL;
@@ -115,7 +165,7 @@ struct esht
 unsigned long esht_hash(char *str)
 {
     unsigned long hash = 5381;
-    int c;
+    int c = 0;
 
     while ((c = *str++))
         hash = ((hash << 5) + hash) ^ c;
@@ -125,9 +175,9 @@ unsigned long esht_hash(char *str)
 
 esht *esht_create()
 {
-    esht *table;
+    esht *table = NULL;
 
-    table = malloc(sizeof(esht));
+    table = calloc(1, sizeof(esht));
     if (table == NULL)
         return NULL;
 
@@ -143,10 +193,10 @@ esht *esht_create()
     return table;
 }
 
-int esht_resize(esht *table, size_t new_cap)
+static int esht_resize(esht *table, size_t new_cap)
 {
-    int i, ii;
-    esht_entry *cur, *next, **old;
+    int i = 0, ii = 0;
+    esht_entry *cur = NULL, *next = NULL, **old = NULL;
 
     esht_entry **new_entries = calloc(new_cap, sizeof(esht_entry *));
     if (new_entries == NULL)
@@ -174,10 +224,56 @@ int esht_resize(esht *table, size_t new_cap)
     return 0;
 }
 
+int esht_keys(esht *table, char ***output)
+{
+    int key_count = 0;
+    for (int i = 0; i < table->cap; i++)
+    {
+        esht_entry *entry = table->entries[i];
+        while (entry != NULL)
+        {
+            key_count++;
+            entry = entry->n;
+        }
+    }
+    if (key_count == 0)
+    {
+        *output = NULL;
+        return 0;
+    }
+    char **keys = calloc(key_count, sizeof(char *));
+    if (keys == NULL)
+        return -1;
+
+    int key_i = 0;
+    for (int i = 0; i < table->cap; i++)
+    {
+        esht_entry *entry = table->entries[i];
+        while (entry != NULL)
+        {
+            char *key = calloc(strlen(entry->k) + 1, sizeof(char));
+            if (key == NULL)
+            {
+                for (int ii = 0; ii < key_i; ii++)
+                    free(keys[ii]);
+                free(keys);
+                return -1;
+            }
+            strncpy(key, entry->k, strlen(entry->k));
+            keys[key_i] = key;
+            key_i++;
+
+            entry = entry->n;
+        }
+    }
+    *output = keys;
+    return key_count;
+}
+
 esht_entry *esht_get_entry(esht *table, char *key)
 {
-    unsigned long i;
-    esht_entry *e;
+    unsigned long i = 0;
+    esht_entry *e = NULL;
 
     i = esht_hash(key) % table->cap;
     e = table->entries[i];
@@ -193,8 +289,10 @@ esht_entry *esht_get_entry(esht *table, char *key)
 
 void *esht_get(esht *table, char *key, size_t *len)
 {
-    esht_entry *e;
-    void *r;
+    if (table == NULL)
+        return NULL;
+    esht_entry *e = NULL;
+    void *r = NULL;
 
     e = esht_get_entry(table, key);
     if (e == NULL)
@@ -204,7 +302,7 @@ void *esht_get(esht *table, char *key, size_t *len)
         return NULL;
     }
 
-    r = malloc(e->l);
+    r = calloc(e->l, 1);
     if (r == NULL)
     {
         if (len != NULL)
@@ -220,14 +318,14 @@ void *esht_get(esht *table, char *key, size_t *len)
 
 int esht_update(esht *table, char *key, void *value, size_t len)
 {
-    unsigned long i;
-    esht_entry *e;
-    void *v, *k, *old;
+    unsigned long i = 0;
+    esht_entry *e = NULL;
+    void *v = NULL, *k = NULL, *old = NULL;
 
     e = esht_get_entry(table, key);
     if (e != NULL)
     {
-        v = malloc(len);
+        v = calloc(len, 1);
         if (v == NULL)
             return 1;
         memcpy(v, value, len);
@@ -240,11 +338,11 @@ int esht_update(esht *table, char *key, void *value, size_t len)
         return 0;
     }
 
-    e = malloc(sizeof(esht_entry));
+    e = calloc(1, sizeof(esht_entry));
     if (e == NULL)
         return 1;
 
-    v = malloc(len);
+    v = calloc(len, 1);
     if (v == NULL)
     {
         free(e);
@@ -252,7 +350,7 @@ int esht_update(esht *table, char *key, void *value, size_t len)
     }
     memcpy(v, value, len);
 
-    k = malloc(strlen(key) + 1);
+    k = calloc(strlen(key) + 1, 1);
     if (k == NULL)
     {
         free(e);
@@ -279,8 +377,8 @@ int esht_update(esht *table, char *key, void *value, size_t len)
 
 int esht_remove(esht *table, char *key)
 {
-    unsigned long i;
-    esht_entry *e;
+    unsigned long i = 0;
+    esht_entry *e = NULL;
 
     i = esht_hash(key) % table->cap;
     e = table->entries[i];
@@ -319,8 +417,8 @@ cleanup:
 
 void esht_destroy(esht *table)
 {
-    int i;
-    esht_entry *e, *n;
+    int i = 0;
+    esht_entry *e = NULL, *n = NULL;
 
     for (i = 0; i < table->cap; i++)
     {

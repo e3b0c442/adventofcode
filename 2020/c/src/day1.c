@@ -7,11 +7,12 @@
 static int input_to_ints(const char *input, size_t input_len, int **output)
 {
     char **lines;
+    int *entries = NULL;
     int line_count = input_to_lines(input, input_len, &lines);
     if (line_count < 0)
         goto err_cleanup;
 
-    int *entries = calloc(line_count, sizeof(int));
+    entries = calloc(line_count, sizeof(int));
     if (entries == NULL)
         goto err_cleanup;
 
