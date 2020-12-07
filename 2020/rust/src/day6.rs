@@ -16,33 +16,33 @@ pub fn day6(input_file: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
-    let groups = input.split("\n\n");
-    let mut sum = 0;
-    for group in groups {
-        let mut set: HashSet<char> = HashSet::new();
-        for line in group.lines() {
-            for c in line.chars() {
-                set.insert(c);
-            }
-        }
-        sum += set.len()
-    }
-    Ok(sum as i32)
+    Ok(input.split("\n\n").fold(0, |sum, group| {
+        sum + group
+            .lines()
+            .fold(HashSet::new(), |set, line| {
+                line.chars().fold(set, |mut qs, c| {
+                    qs.insert(c);
+                    qs
+                })
+            })
+            .len() as i32
+    }))
 }
 
 fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
-    let groups = input.split("\n\n");
-    let mut sum = 0;
-    for group in groups {
-        let mut map: HashMap<char, usize> = HashMap::new();
-        for line in group.lines() {
-            for c in line.chars() {
-                let counter = map.entry(c).or_insert(0);
-                *counter += 1;
-            }
-        }
+    Ok(input.split("\n\n").fold(0, |sum, group| {
         let group_size = group.lines().count();
-        sum += map.iter().filter(|&(_, v)| *v == group_size).count();
-    }
-    Ok(sum as i32)
+        sum + group
+            .lines()
+            .fold(HashMap::new(), |map, line| {
+                line.chars().fold(map, |mut qs, c| {
+                    let counter = qs.entry(c).or_insert(0);
+                    *counter += 1;
+                    qs
+                })
+            })
+            .iter()
+            .filter(|&(_, v)| *v == group_size)
+            .count() as i32
+    }))
 }
