@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-import fs from "fs";
+const fs = require("fs");
 
 const part1 = (input) => {
   return input
     .split("\n")
     .map((p) => {
-      let row = [0, 127]
+      let row = [0, 127];
       for (let c of p.slice(0, 7)) {
         const split = (row[1] + 1 - row[0]) / 2;
         switch (c) {
           case "F":
-            row[1] -= split
+            row[1] -= split;
             break;
           case "B":
-            row[0] += split
+            row[0] += split;
             break;
           default:
             throw "Invalid input";
@@ -26,10 +26,10 @@ const part1 = (input) => {
         const split = (col[1] + 1 - col[0]) / 2;
         switch (c) {
           case "L":
-            col[1] -= split
+            col[1] -= split;
             break;
           case "R":
-            col[0] += split
+            col[0] += split;
             break;
           default:
             throw "Invalid input";
@@ -59,10 +59,6 @@ const day5 = (inputFile) => {
   console.log(`\tPart 2: ${part2(ids)}`);
 };
 
-export default day5;
+module.exports = day5;
 
-try {
-  day5(process.argv[2]);
-} catch (e) {
-  console.log(`${e}`);
-}
+if (require.main === module) day5(process.argv[2]);

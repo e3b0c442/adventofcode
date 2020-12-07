@@ -4,6 +4,5 @@
   "description": "Advent of Code - 2020",
   "repository": "git+https://github.com/e3b0c442/adventofcode.git",
   "author": "Nick Meyer <nick@e3b0c442.io>",
-  "license": "Unlicense",
-  "type": "module"
+  "license": "Unlicense"
 }

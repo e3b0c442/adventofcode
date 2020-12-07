@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from "fs";
+const fs = require("fs");
 
 const slope_trees = (rows, slope) => {
   const [r, d] = slope;
@@ -36,10 +36,6 @@ const day3 = (inputFile) => {
   console.log(`\tPart 2: ${part2(input)}`);
 };
 
-export default day3;
+module.exports = day3;
 
-try {
-  day3(process.argv[2]);
-} catch (e) {
-  console.log(`${e}`);
-}
+if (require.main === module) day3(process.argv[2]);

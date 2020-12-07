@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from "fs";
+const fs = require("fs");
 
 const part1 = (input) => {
   const entries = input.split("\n").map((e) => parseInt(e));
@@ -34,10 +34,6 @@ const day1 = (inputFile) => {
   console.log(`\tPart 2: ${part2(input)}`);
 };
 
-export default day1;
+module.exports = day1;
 
-try {
-  day1(process.argv[2]);
-} catch (e) {
-  console.log(`${e}`);
-}
+if (require.main === module) day1(process.argv[2]);
