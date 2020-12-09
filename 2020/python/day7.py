@@ -8,7 +8,7 @@ def day7(input_file):
     with open(input_file, "r") as f:
         input = f.read()
 
-    print("Day 7: Handy Haversacks)")
+    print("Day 7: Handy Haversacks")
     print(f"\tPart 1: {__part1(input)}")
     print(f"\tPart 2: {__part2(input)}")
 
