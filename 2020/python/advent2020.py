@@ -9,10 +9,11 @@ from day6 import day6
 from day7 import day7
 from day8 import day8
 from day9 import day9
+from day10 import day10
 
 
 def advent2020(input_folder):
-    funcs = [day1, day2, day3, day4, day5, day6, day7, day8, day9]
+    funcs = [day1, day2, day3, day4, day5, day6, day7, day8, day9, day10]
     for i, f in enumerate(funcs):
         f(f"{input_folder}/{i+1}.txt")
 
