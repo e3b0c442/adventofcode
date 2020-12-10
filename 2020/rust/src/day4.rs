@@ -1,5 +1,6 @@
 use simple_error::SimpleError;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -17,149 +18,132 @@ pub fn day4(input_file: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn input_to_passports(input: &str) -> Result<Vec<HashMap<String, String>>, Box<dyn Error>> {
-    let mut passports = Vec::new();
-    let records = input.split("\n\n");
-    for record in records {
-        let mut passport: HashMap<String, String> = HashMap::new();
-        let record = record.replace("\n", " ");
-        let fields = record.split(" ");
-        for field in fields {
-            let kv: Vec<&str> = field.split(":").collect();
-            if let Some(_) = passport.insert(kv[0].to_string(), kv[1].to_string()) {
-                return Err(Box::new(SimpleError::new("duplicate field in passport")));
-            }
-        }
-        passports.push(passport)
-    }
-
-    return Ok(passports);
+    input
+        .split("\n\n")
+        .try_fold(Vec::new(), |mut passports, record| {
+            let passport = record.replace("\n", " ").split(" ").try_fold(
+                HashMap::new(),
+                |mut passport, field| -> Result<HashMap<String, String>, Box<dyn Error>> {
+                    let kv: Vec<&str> = field.split(":").collect();
+                    if kv.len() < 2 {
+                        return Err(SimpleError::new(format!("Invalid input: {}", record)).into());
+                    }
+                    passport.insert(kv[0].to_string(), kv[1].to_string());
+                    Ok(passport)
+                },
+            )?;
+            passports.push(passport);
+            Ok(passports)
+        })
 }
 
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
-    let passports = input_to_passports(input)?;
-    let mut valid = 0;
-    let fields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-    'pp: for passport in passports {
-        for field in fields.iter() {
-            if let None = passport.get(&field.to_string()) {
-                continue 'pp;
+    let fields: HashSet<&str> = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
+        .iter()
+        .cloned()
+        .collect();
+    Ok(input_to_passports(input)?
+        .iter()
+        .fold(0, |valid, passport| {
+            let pfields: HashSet<&str> = passport.keys().map(|k| k.as_str()).collect();
+            if pfields.intersection(&fields).count() == fields.len() {
+                valid + 1
+            } else {
+                valid
+            }
+        }))
+}
+
+fn passport_valid(passport: &HashMap<String, String>) -> Result<(), Box<dyn Error>> {
+    match passport.get("byr") {
+        None => return Err(SimpleError::new("").into()),
+        Some(byr) => {
+            if byr.len() != 4 {
+                return Err(SimpleError::new("").into());
+            }
+            let byr = byr.parse::<i32>()?;
+            if byr < 1920 || byr > 2002 {
+                return Err(SimpleError::new("").into());
             }
         }
-        valid += 1;
+    };
+    match passport.get("iyr") {
+        None => return Err(SimpleError::new("").into()),
+        Some(iyr) => {
+            if iyr.len() != 4 {
+                return Err(SimpleError::new("").into());
+            }
+            let iyr = iyr.parse::<i32>()?;
+            if iyr < 2010 || iyr > 2020 {
+                return Err(SimpleError::new("").into());
+            }
+        }
+    };
+    match passport.get("eyr") {
+        None => return Err(SimpleError::new("").into()),
+        Some(eyr) => {
+            if eyr.len() != 4 {
+                return Err(SimpleError::new("").into());
+            }
+            let eyr = eyr.parse::<i32>()?;
+            if eyr < 2020 || eyr > 2030 {
+                return Err(SimpleError::new("").into());
+            }
+        }
+    };
+    match passport.get("hgt") {
+        None => return Err(SimpleError::new("").into()),
+        Some(hgt) => {
+            let unit = &hgt[hgt.len() - 2..];
+            let value = hgt[0..hgt.len() - 2].parse::<i32>()?;
+            match unit {
+                "cm" => {
+                    if value < 150 || value > 193 {
+                        return Err(SimpleError::new("").into());
+                    }
+                }
+                "in" => {
+                    if value < 59 || value > 76 {
+                        return Err(SimpleError::new("").into());
+                    }
+                }
+                _ => return Err(SimpleError::new("").into()),
+            }
+        }
+    };
+    match passport.get("hcl") {
+        None => return Err(SimpleError::new("").into()),
+        Some(hcl) => {
+            if hcl[0..1].ne("#") {
+                return Err(SimpleError::new("").into());
+            }
+            i32::from_str_radix(&hcl[1..], 16)?;
+        }
     }
-    Ok(valid)
+    match passport.get("ecl") {
+        None => return Err(SimpleError::new("").into()),
+        Some(ecl) => match &ecl[..] {
+            "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth" => {}
+            _ => return Err(SimpleError::new("").into()),
+        },
+    }
+    match passport.get("pid") {
+        None => return Err(SimpleError::new("").into()),
+        Some(pid) => {
+            if pid.len() != 9 {
+                return Err(SimpleError::new("").into());
+            }
+            pid.parse::<i32>()?;
+        }
+    }
+    Ok(())
 }
 
 fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
-    let passports = input_to_passports(input)?;
-    let mut valid = 0;
-
-    for passport in passports {
-        match passport.get("byr") {
-            None => continue,
-            Some(byr) => {
-                if byr.len() != 4 {
-                    continue;
-                }
-                match byr.parse::<i32>() {
-                    Err(_) => continue,
-                    Ok(byr) => {
-                        if byr < 1920 || byr > 2002 {
-                            continue;
-                        }
-                    }
-                }
-            }
-        };
-        match passport.get("iyr") {
-            None => continue,
-            Some(iyr) => {
-                if iyr.len() != 4 {
-                    continue;
-                }
-                match iyr.parse::<i32>() {
-                    Err(_) => continue,
-                    Ok(iyr) => {
-                        if iyr < 2010 || iyr > 2020 {
-                            continue;
-                        }
-                    }
-                }
-            }
-        };
-        match passport.get("eyr") {
-            None => continue,
-            Some(eyr) => {
-                if eyr.len() != 4 {
-                    continue;
-                }
-                match eyr.parse::<i32>() {
-                    Err(_) => continue,
-                    Ok(eyr) => {
-                        if eyr < 2020 || eyr > 2030 {
-                            continue;
-                        }
-                    }
-                }
-            }
-        };
-        match passport.get("hgt") {
-            None => continue,
-            Some(hgt) => {
-                let unit = &hgt[hgt.len() - 2..];
-                let value = &hgt[0..hgt.len() - 2];
-                match value.parse::<i32>() {
-                    Err(_) => continue,
-                    Ok(value) => match unit {
-                        "cm" => {
-                            if value < 150 || value > 193 {
-                                continue;
-                            }
-                        }
-                        "in" => {
-                            if value < 59 || value > 76 {
-                                continue;
-                            }
-                        }
-                        _ => continue,
-                    },
-                }
-            }
-        };
-        match passport.get("hcl") {
-            None => continue,
-            Some(hcl) => {
-                if hcl[0..1].ne("#") {
-                    continue;
-                }
-                match i32::from_str_radix(&hcl[1..], 16) {
-                    Err(_) => continue,
-                    Ok(_) => {}
-                };
-            }
-        }
-        match passport.get("ecl") {
-            None => continue,
-            Some(ecl) => match &ecl[..] {
-                "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth" => {}
-                _ => continue,
-            },
-        }
-        match passport.get("pid") {
-            None => continue,
-            Some(pid) => {
-                if pid.len() != 9 {
-                    continue;
-                }
-                match pid.parse::<i32>() {
-                    Err(_) => continue,
-                    Ok(_) => {}
-                }
-            }
-        }
-
-        valid += 1;
-    }
-
-    Ok(valid)
+    Ok(input_to_passports(input)?
+        .iter()
+        .fold(0, |valid, passport| match passport_valid(passport) {
+            Ok(_) => valid + 1,
+            Err(_) => valid,
+        }))
 }

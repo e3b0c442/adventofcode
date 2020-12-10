@@ -16,35 +16,37 @@ pub fn day1(input_file: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
-    let mut entries = Vec::new();
-    for line in input.lines() {
-        entries.push(line.parse::<i32>()?);
-    }
-    for i in 0..entries.len() {
-        for j in i + 1..entries.len() {
-            if entries[i] + entries[j] == 2020 {
-                return Ok(entries[i] * entries[j]);
+    let entries: Result<Vec<i32>, _> = input.lines().map(|x| x.parse::<i32>()).collect();
+    match entries {
+        Ok(entries) => {
+            for i in 0..entries.len() {
+                for j in i + 1..entries.len() {
+                    if entries[i] + entries[j] == 2020 {
+                        return Ok(entries[i] * entries[j]);
+                    }
+                }
             }
+            Err(SimpleError::new("Solution not found").into())
         }
+        Err(err) => Err(Box::new(err)),
     }
-
-    Err(Box::new(SimpleError::new("Solution not found")))
 }
 
 fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
-    let mut entries = Vec::new();
-    for line in input.lines() {
-        entries.push(line.parse::<i32>()?);
-    }
-    for i in 0..entries.len() {
-        for j in i + 1..entries.len() {
-            for k in j + 1..entries.len() {
-                if entries[i] + entries[j] + entries[k] == 2020 {
-                    return Ok(entries[i] * entries[j] * entries[k]);
+    let entries: Result<Vec<i32>, _> = input.lines().map(|x| x.parse::<i32>()).collect();
+    match entries {
+        Ok(entries) => {
+            for i in 0..entries.len() {
+                for j in i + 1..entries.len() {
+                    for k in j + 1..entries.len() {
+                        if entries[i] + entries[j] + entries[k] == 2020 {
+                            return Ok(entries[i] * entries[j] * entries[k]);
+                        }
+                    }
                 }
             }
+            Err(SimpleError::new("Solution not found").into())
         }
+        Err(err) => Err(Box::new(err)),
     }
-
-    Err(Box::new(SimpleError::new("Solution not found")))
 }
