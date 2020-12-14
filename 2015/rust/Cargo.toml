@@ -7,4 +7,6 @@ default-run = "advent2015"
 
 [dependencies]
 simple-error = "0.2"
-md-5 = "0.9.1"
+md-5 = "0.9"
+lazy_static = "1"
+regex = "1"
