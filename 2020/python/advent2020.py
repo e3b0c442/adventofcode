@@ -14,6 +14,7 @@ from day11 import day11
 from day12 import day12
 from day13 import day13
 from day14 import day14
+from day15 import day15
 
 
 def advent2020(input_folder):
@@ -32,6 +33,7 @@ def advent2020(input_folder):
         day12,
         day13,
         day14,
+        day15,
     ]
     for i, f in enumerate(funcs):
         f(f"{input_folder}/{i+1}.txt")
