@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-use simple_error::SimpleError;
+use simple_error::{bail, require_with};
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -25,55 +25,45 @@ lazy_static! {
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
     let mut grid = vec![vec![0; 1000]; 1000];
     for line in input.lines() {
-        match INSTR_RE.captures(line) {
-            Some(caps) => {
-                let (instr, min_x, max_x, min_y, max_y);
-                match caps.get(1) {
-                    Some(cap) => instr = cap.as_str(),
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(2) {
-                    Some(cap) => min_x = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(3) {
-                    Some(cap) => min_y = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(4) {
-                    Some(cap) => max_x = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(5) {
-                    Some(cap) => max_y = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match instr {
-                    "turn on" => {
-                        for x in min_x..=max_x {
-                            for y in min_y..=max_y {
-                                grid[x][y] = 1;
-                            }
-                        }
+        let caps = require_with!(INSTR_RE.captures(line), &format!("Invalid input: {}", line));
+        let (instr, min_x, max_x, min_y, max_y) = (
+            require_with!(caps.get(1), &format!("Invalid input: {}", line)).as_str(),
+            require_with!(caps.get(2), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+            require_with!(caps.get(3), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+            require_with!(caps.get(4), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+            require_with!(caps.get(5), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+        );
+        match instr {
+            "turn on" => {
+                for x in min_x..=max_x {
+                    for y in min_y..=max_y {
+                        grid[x][y] = 1;
                     }
-                    "turn off" => {
-                        for x in min_x..=max_x {
-                            for y in min_y..=max_y {
-                                grid[x][y] = 0;
-                            }
-                        }
-                    }
-                    "toggle" => {
-                        for x in min_x..=max_x {
-                            for y in min_y..=max_y {
-                                grid[x][y] ^= 1;
-                            }
-                        }
-                    }
-                    _ => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
                 }
             }
-            None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
+            "turn off" => {
+                for x in min_x..=max_x {
+                    for y in min_y..=max_y {
+                        grid[x][y] = 0;
+                    }
+                }
+            }
+            "toggle" => {
+                for x in min_x..=max_x {
+                    for y in min_y..=max_y {
+                        grid[x][y] ^= 1;
+                    }
+                }
+            }
+            _ => bail!(format!("Invalid input: {}", line)),
         }
     }
     Ok(grid
@@ -84,57 +74,47 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
 fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
     let mut grid = vec![vec![0; 1000]; 1000];
     for line in input.lines() {
-        match INSTR_RE.captures(line) {
-            Some(caps) => {
-                let (instr, min_x, max_x, min_y, max_y);
-                match caps.get(1) {
-                    Some(cap) => instr = cap.as_str(),
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(2) {
-                    Some(cap) => min_x = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(3) {
-                    Some(cap) => min_y = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(4) {
-                    Some(cap) => max_x = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match caps.get(5) {
-                    Some(cap) => max_y = cap.as_str().parse::<usize>()?,
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
-                }
-                match instr {
-                    "turn on" => {
-                        for x in min_x..=max_x {
-                            for y in min_y..=max_y {
-                                grid[x][y] += 1;
-                            }
-                        }
+        let caps = require_with!(INSTR_RE.captures(line), &format!("Invalid input: {}", line));
+        let (instr, min_x, max_x, min_y, max_y) = (
+            require_with!(caps.get(1), &format!("Invalid input: {}", line)).as_str(),
+            require_with!(caps.get(2), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+            require_with!(caps.get(3), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+            require_with!(caps.get(4), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+            require_with!(caps.get(5), &format!("Invalid input: {}", line))
+                .as_str()
+                .parse::<usize>()?,
+        );
+        match instr {
+            "turn on" => {
+                for x in min_x..=max_x {
+                    for y in min_y..=max_y {
+                        grid[x][y] += 1;
                     }
-                    "turn off" => {
-                        for x in min_x..=max_x {
-                            for y in min_y..=max_y {
-                                if grid[x][y] > 0 {
-                                    grid[x][y] -= 1;
-                                }
-                            }
-                        }
-                    }
-                    "toggle" => {
-                        for x in min_x..=max_x {
-                            for y in min_y..=max_y {
-                                grid[x][y] += 2;
-                            }
-                        }
-                    }
-                    _ => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
                 }
             }
-            None => return Err(SimpleError::new(format!("Invalid input: {}", line)).into()),
+            "turn off" => {
+                for x in min_x..=max_x {
+                    for y in min_y..=max_y {
+                        if grid[x][y] > 0 {
+                            grid[x][y] -= 1;
+                        }
+                    }
+                }
+            }
+            "toggle" => {
+                for x in min_x..=max_x {
+                    for y in min_y..=max_y {
+                        grid[x][y] += 2;
+                    }
+                }
+            }
+            _ => bail!(format!("Invalid input: {}", line)),
         }
     }
     Ok(grid

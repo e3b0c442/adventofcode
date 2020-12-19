@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-use simple_error::SimpleError;
+use simple_error::{bail, require_with, SimpleError};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
@@ -28,21 +28,12 @@ lazy_static! {
 
 fn build_gates(input: &str) -> Result<HashMap<&str, &str>, SimpleError> {
     input.lines().try_fold(HashMap::new(), |mut map, line| {
-        match GATES_RE.captures(line) {
-            Some(caps) => {
-                let k = match caps.get(2) {
-                    Some(cap) => cap.as_str(),
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line))),
-                };
-                let v = match caps.get(1) {
-                    Some(cap) => cap.as_str(),
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", line))),
-                };
-                map.insert(k, v);
-                Ok(map)
-            }
-            None => return Err(SimpleError::new(format!("Invalid input: {}", line))),
-        }
+        let caps = require_with!(GATES_RE.captures(line), &format!("Invalid input: {}", line));
+        map.insert(
+            require_with!(caps.get(2), &format!("Invalid input: {}", line)).as_str(),
+            require_with!(caps.get(1), &format!("Invalid input: {}", line)).as_str(),
+        );
+        Ok(map)
     })
 }
 
@@ -55,43 +46,35 @@ fn exec_gate(
         return Ok(*v);
     }
 
-    match gates.get(key) {
-        Some(gate) => match GATE_RE.captures(gate) {
-            Some(caps) => {
-                let l = match caps.get(1) {
-                    Some(cap) => match cap.as_str().parse::<u16>() {
-                        Ok(l) => l,
-                        Err(_) => exec_gate(gates, cap.as_str(), cache)?,
-                    },
-                    None => 0,
-                };
-                let r = match caps.get(3) {
-                    Some(cap) => match cap.as_str().parse::<u16>() {
-                        Ok(l) => l,
-                        Err(_) => exec_gate(gates, cap.as_str(), cache)?,
-                    },
-                    None => return Err(SimpleError::new(format!("Invalid input: {}", gate)).into()),
-                };
-                let sol = match caps.get(2) {
-                    Some(cap) => match cap.as_str() {
-                        "LSHIFT" => l << r,
-                        "RSHIFT" => l >> r,
-                        "AND" => l & r,
-                        "OR" => l | r,
-                        "NOT" => !r,
-                        _ => {
-                            return Err(SimpleError::new(format!("Invalid input: {}", gate)).into())
-                        }
-                    },
-                    None => r,
-                };
-                cache.insert(key.to_string(), sol);
-                Ok(sol)
-            }
-            None => Err(SimpleError::new(format!("Invalid input: {}", gate)).into()),
+    let gate = require_with!(gates.get(key), &format!("No gate for key {}", key));
+    let caps = require_with!(GATE_RE.captures(gate), &format!("Invalid input: {}", gate));
+    let l = match caps.get(1) {
+        Some(cap) => match cap.as_str().parse::<u16>() {
+            Ok(l) => l,
+            Err(_) => exec_gate(gates, cap.as_str(), cache)?,
         },
-        None => Err(SimpleError::new(format!("No gate for key {}", key)).into()),
-    }
+        None => 0,
+    };
+    let r = match caps.get(3) {
+        Some(cap) => match cap.as_str().parse::<u16>() {
+            Ok(l) => l,
+            Err(_) => exec_gate(gates, cap.as_str(), cache)?,
+        },
+        None => bail!(format!("Invalid input: {}", gate)),
+    };
+    let sol = match caps.get(2) {
+        Some(cap) => match cap.as_str() {
+            "LSHIFT" => l << r,
+            "RSHIFT" => l >> r,
+            "AND" => l & r,
+            "OR" => l | r,
+            "NOT" => !r,
+            _ => bail!(format!("Invalid input: {}", gate)),
+        },
+        None => r,
+    };
+    cache.insert(key.to_string(), sol);
+    Ok(sol)
 }
 
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {

@@ -1,4 +1,4 @@
-use simple_error::SimpleError;
+use simple_error::bail;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -48,7 +48,7 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
                     max_y = y;
                 }
             }
-            _ => return Err(SimpleError::new(format!("Invalid input: {}", c)).into()),
+            _ => bail!(format!("Invalid input: {}", c)),
         };
     }
 
@@ -63,7 +63,7 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
             'v' => y -= 1,
             '<' => x -= 1,
             '^' => y += 1,
-            _ => return Err(SimpleError::new(format!("Invalid input: {}", c)).into()),
+            _ => bail!(format!("Invalid input: {}", c)),
         };
         grid[x][y] = true;
     }
@@ -107,7 +107,7 @@ fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
                     max_y = y[s];
                 }
             }
-            _ => return Err(SimpleError::new(format!("Invalid input: {}", c)).into()),
+            _ => bail!(format!("Invalid input: {}", c)),
         };
         s ^= 1;
     }
@@ -124,7 +124,7 @@ fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
             'v' => y[s] -= 1,
             '<' => x[s] -= 1,
             '^' => y[s] += 1,
-            _ => return Err(SimpleError::new(format!("Invalid input: {}", c)).into()),
+            _ => bail!(format!("Invalid input: {}", c)),
         };
         grid[x[s]][y[s]] = true;
         s ^= 1;

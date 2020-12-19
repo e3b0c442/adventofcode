@@ -1,4 +1,4 @@
-use simple_error::SimpleError;
+use simple_error::bail;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -19,7 +19,7 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
     input.chars().try_fold(0, |floor, c| match c {
         '(' => Ok(floor + 1),
         ')' => Ok(floor - 1),
-        _ => Err(SimpleError::new(format!("Invalid input: {}", c)).into()),
+        _ => bail!(format!("Invalid input: {}", c)),
     })
 }
 
@@ -29,11 +29,11 @@ fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
         match c {
             '(' => floor += 1,
             ')' => floor -= 1,
-            _ => return Err(SimpleError::new(format!("Invalid input: {}", c)).into()),
+            _ => bail!(format!("Invalid input: {}", c)),
         };
         if floor == -1 {
             return Ok((i + 1) as i32);
         }
     }
-    Err(SimpleError::new("Solution not found").into())
+    bail!("Solution not found")
 }
