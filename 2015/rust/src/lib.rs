@@ -5,6 +5,7 @@ mod day10;
 mod day11;
 mod day12;
 mod day13;
+mod day14;
 mod day2;
 mod day3;
 mod day4;
@@ -18,6 +19,7 @@ pub use day10::day10;
 pub use day11::day11;
 pub use day12::day12;
 pub use day13::day13;
+pub use day14::day14;
 pub use day2::day2;
 pub use day3::day3;
 pub use day4::day4;
@@ -29,7 +31,7 @@ pub use day9::day9;
 
 pub fn run_all(input_path: &str) -> Result<(), Box<dyn Error>> {
     let funcs = [
-        day1, day2, day3, day4, day5, day6, day7, day8, day9, day10, day11, day12, day13,
+        day1, day2, day3, day4, day5, day6, day7, day8, day9, day10, day11, day12, day13, day14,
     ];
     for (i, func) in funcs.iter().enumerate() {
         func(&format!("{}/{}.txt", input_path, i + 1))?;
