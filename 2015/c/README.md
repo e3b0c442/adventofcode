@@ -3,6 +3,8 @@
 ## Requirements
 
 - A C compiler (gcc or clang) capable of standard C17
+- OpenSSL (tested on 1.1.1)
+- PCRE (not PCRE2, tested on 8.39)
 
 ## Running the entire suite
 
