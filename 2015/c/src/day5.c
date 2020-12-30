@@ -10,6 +10,7 @@ static int part1(const char *input, size_t input_len)
     const char *error;
     int erroffset;
     int good = 0;
+    char **lines = NULL;
 
     pcre *nice_re = pcre_compile("^(?!.*(?:ab|cd|pq|xy))(?=.*(.)\\1)(?=(?:.*[aeiou]){3,}).*$", 0, &error, &erroffset, NULL);
     if (nice_re == NULL)
@@ -18,7 +19,6 @@ static int part1(const char *input, size_t input_len)
         goto err_cleanup;
     }
 
-    char **lines;
     size_t lines_len = input_to_lines(&lines, input, input_len);
     if (lines_len < 0)
         goto err_cleanup;
@@ -46,6 +46,7 @@ static int part2(const char *input, size_t input_len)
     const char *error;
     int erroffset;
     int good = 0;
+    char **lines = NULL;
 
     pcre *nice_re = pcre_compile("^(?=.*(..).*\\1)(?=.*(.).\\2).*$", 0, &error, &erroffset, NULL);
     if (nice_re == NULL)
@@ -54,7 +55,6 @@ static int part2(const char *input, size_t input_len)
         goto err_cleanup;
     }
 
-    char **lines;
     size_t lines_len = input_to_lines(&lines, input, input_len);
     if (lines_len < 0)
         goto err_cleanup;
