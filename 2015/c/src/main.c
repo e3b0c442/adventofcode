@@ -26,7 +26,7 @@ int main(int argc, char const *argv[])
 #else  // #ifdef DAYNUM
 typedef int (*day_f)(const char *);
 
-static const int days_len = 7;
+static const int days_len = 8;
 static const day_f days[] = {
     day1,
     day2,
@@ -34,7 +34,8 @@ static const day_f days[] = {
     day4,
     day5,
     day6,
-    day7};
+    day7,
+    day8};
 
 int main(int argc, char const *argv[])
 {

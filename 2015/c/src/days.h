@@ -5,3 +5,4 @@ int day4(const char *);
 int day5(const char *);
 int day6(const char *);
 int day7(const char *);
+int day8(const char *);
