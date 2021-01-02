@@ -1,0 +1,12 @@
+[package]
+name = "advent2016"
+version = "0.1.0"
+authors = ["Nick Meyer <nick@e3b0c442.io>"]
+edition = "2018"
+default-run = "advent2016"
+
+[dependencies]
+simple-error = "0.2"
+lazy_static = "1"
+regex = "1"
+md-5 = "0.9"
