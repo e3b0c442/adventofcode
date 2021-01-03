@@ -2,6 +2,7 @@ use std::cmp::min;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
+use std::time::Instant;
 
 pub fn day17(input_file: &str) -> Result<(), Box<dyn Error>> {
     println!("Day 17: No Such Thing as Too Much");
@@ -10,9 +11,16 @@ pub fn day17(input_file: &str) -> Result<(), Box<dyn Error>> {
     let mut input = String::new();
     f.read_to_string(&mut input)?;
 
+    let start = Instant::now();
     let sol1 = part1(&input)?;
-    println!("\tPart 1: {}", sol1.0);
-    println!("\tPart 2: {}", part2(&input, sol1.1)?);
+    println!("\tPart 1: {} ({:?})", sol1.0, start.elapsed());
+    let second = Instant::now();
+    println!(
+        "\tPart 2: {} ({:?})",
+        part2(&input, sol1.1)?,
+        second.elapsed()
+    );
+    println!("\t\t Completed in {:?}", start.elapsed());
     Ok(())
 }
 

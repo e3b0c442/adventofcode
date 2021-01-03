@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
+use std::time::Instant;
 
 pub fn day2(input_file: &str) -> Result<(), Box<dyn Error>> {
     println!("Day 2: I Was Told There Would Be No Math");
@@ -9,8 +10,11 @@ pub fn day2(input_file: &str) -> Result<(), Box<dyn Error>> {
     let mut input = String::new();
     f.read_to_string(&mut input)?;
 
-    println!("\tPart 1: {}", part1(&input)?);
-    println!("\tPart 2: {}", part2(&input)?);
+    let start = Instant::now();
+    println!("\tPart 1: {} ({:?})", part1(&input)?, start.elapsed());
+    let second = Instant::now();
+    println!("\tPart 2: {} ({:?})", part2(&input)?, second.elapsed());
+    println!("\t\t Completed in {:?}", start.elapsed());
     Ok(())
 }
 
