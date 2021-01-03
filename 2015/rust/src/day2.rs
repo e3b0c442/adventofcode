@@ -14,21 +14,21 @@ pub fn day2(input_file: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn input_to_dims(input: &str) -> Result<Vec<Vec<i32>>, std::num::ParseIntError> {
-    input
+fn input_to_dims(input: &str) -> Result<Vec<Vec<i32>>, Box<dyn Error>> {
+    let mut dims = input
         .lines()
         .map(|line| {
             line.split("x")
                 .map(|d| d.parse::<i32>())
                 .collect::<Result<Vec<i32>, _>>()
         })
-        .collect::<Result<Vec<Vec<i32>>, _>>()
+        .collect::<Result<Vec<Vec<i32>>, _>>()?;
+    dims.sort();
+    Ok(dims)
 }
 
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
-    let dims = input_to_dims(input)?;
-    Ok(dims.into_iter().fold(0, |paper, mut dims| {
-        dims.sort();
+    Ok(input_to_dims(input)?.iter().fold(0, |paper, dims| {
         paper
             + 2 * dims[0] * dims[1]
             + 2 * dims[1] * dims[2]
@@ -38,9 +38,7 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
 }
 
 fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
-    let dims = input_to_dims(input)?;
-    Ok(dims.into_iter().fold(0, |ribbon, mut dims| {
-        dims.sort();
+    Ok(input_to_dims(input)?.iter().fold(0, |ribbon, dims| {
         ribbon + 2 * dims[0] + 2 * dims[1] + dims[0] * dims[1] * dims[2]
     }))
 }
