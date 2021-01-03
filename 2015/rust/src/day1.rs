@@ -1,4 +1,4 @@
-use simple_error::bail;
+use simple_error::{bail, SimpleError};
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -19,21 +19,39 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
     input.chars().try_fold(0, |floor, c| match c {
         '(' => Ok(floor + 1),
         ')' => Ok(floor - 1),
-        _ => bail!(format!("Invalid input: {}", c)),
+        _ => bail!("Invalid input: {}", c),
     })
 }
 
-fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
-    let mut floor = 0;
-    for (i, c) in input.chars().enumerate() {
-        match c {
-            '(' => floor += 1,
-            ')' => floor -= 1,
-            _ => bail!(format!("Invalid input: {}", c)),
-        };
-        if floor == -1 {
-            return Ok((i + 1) as i32);
-        }
+#[derive(Debug)]
+enum Basement {
+    Floor(i32),
+    Err(Box<dyn Error>),
+}
+impl std::error::Error for Basement {}
+impl std::fmt::Display for Basement {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "")
     }
-    bail!("Solution not found")
+}
+
+fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
+    match input
+        .chars()
+        .enumerate()
+        .try_fold(0, |mut floor, (step, c)| match c {
+            '(' => Ok(floor + 1),
+            ')' => {
+                floor -= 1;
+                if floor < 0 {
+                    Err(Basement::Floor(step as i32))
+                } else {
+                    Ok(floor)
+                }
+            }
+            _ => Err(Basement::Err(SimpleError::new("Invalid input").into())),
+        }) {
+        Err(Basement::Floor(step)) => Ok(step),
+        _ => bail!("Solution not found"),
+    }
 }
