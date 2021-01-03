@@ -1,4 +1,5 @@
 use simple_error::bail;
+use std::cmp::{max, min};
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -16,54 +17,42 @@ pub fn day3(input_file: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
-    let mut x: i32 = 0;
-    let mut y: i32 = 0;
-    let mut min_x: i32 = 0;
-    let mut min_y: i32 = 0;
-    let mut max_x: i32 = 0;
-    let mut max_y: i32 = 0;
+    let (mut x, mut y) = (0, 0);
+    let (mut min_x, mut max_x, mut min_y, mut max_y) = (0, 0, 0, 0);
     for c in input.chars() {
         match c {
             '>' => {
                 x += 1;
-                if x > max_x {
-                    max_x = x;
-                }
+                max_x = max(x, max_x);
             }
             'v' => {
                 y -= 1;
-                if y < min_y {
-                    min_y = y;
-                }
+                min_y = min(y, min_y);
             }
             '<' => {
                 x -= 1;
-                if x < min_x {
-                    min_x = x;
-                }
+                min_x = min(x, min_x);
             }
             '^' => {
                 y += 1;
-                if y > max_y {
-                    max_y = y;
-                }
+                max_y = max(y, max_y);
             }
-            _ => bail!(format!("Invalid input: {}", c)),
+            _ => bail!("Invalid input: {}", c),
         };
     }
 
     let (w, h) = ((max_x + 1 - min_x) as usize, (max_y + 1 - min_y) as usize);
     let mut grid = vec![vec![false; h]; w];
-    let mut x = -min_x as usize;
-    let mut y = -min_y as usize;
+    let (mut x, mut y) = (-min_x as usize, -min_y as usize);
     grid[x][y] = true;
+
     for c in input.chars() {
         match c {
             '>' => x += 1,
             'v' => y -= 1,
             '<' => x -= 1,
             '^' => y += 1,
-            _ => bail!(format!("Invalid input: {}", c)),
+            _ => bail!("Invalid input: {}", c),
         };
         grid[x][y] = true;
     }
@@ -74,38 +63,25 @@ fn part1(input: &str) -> Result<i32, Box<dyn Error>> {
 }
 
 fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
-    let mut x: [i32; 2] = [0, 0];
-    let mut y: [i32; 2] = [0, 0];
-    let mut min_x: i32 = 0;
-    let mut min_y: i32 = 0;
-    let mut max_x: i32 = 0;
-    let mut max_y: i32 = 0;
-    let mut s: usize = 0;
+    let (mut x, mut y) = ([0, 0], [0, 0]);
+    let (mut min_x, mut max_x, mut min_y, mut max_y, mut s) = (0, 0, 0, 0, 0);
     for c in input.chars() {
         match c {
             '>' => {
                 x[s] += 1;
-                if x[s] > max_x {
-                    max_x = x[s];
-                }
+                max_x = max(x[s], max_x);
             }
             'v' => {
                 y[s] -= 1;
-                if y[s] < min_y {
-                    min_y = y[s];
-                }
+                min_y = min(y[s], min_y);
             }
             '<' => {
                 x[s] -= 1;
-                if x[s] < min_x {
-                    min_x = x[s];
-                }
+                min_x = min(x[s], min_x);
             }
             '^' => {
                 y[s] += 1;
-                if y[s] > max_y {
-                    max_y = y[s];
-                }
+                max_y = max(y[s], max_y);
             }
             _ => bail!(format!("Invalid input: {}", c)),
         };
@@ -114,8 +90,10 @@ fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
 
     let (w, h) = ((max_x + 1 - min_x) as usize, (max_y + 1 - min_y) as usize);
     let mut grid = vec![vec![false; h]; w];
-    let mut x: [usize; 2] = [-min_x as usize, -min_x as usize];
-    let mut y: [usize; 2] = [-min_y as usize, -min_y as usize];
+    let (mut x, mut y) = (
+        [-min_x as usize, -min_x as usize],
+        [-min_y as usize, -min_y as usize],
+    );
     s = 0;
     grid[x[s]][y[s]] = true;
     for c in input.chars() {
@@ -124,7 +102,7 @@ fn part2(input: &str) -> Result<i32, Box<dyn Error>> {
             'v' => y[s] -= 1,
             '<' => x[s] -= 1,
             '^' => y[s] += 1,
-            _ => bail!(format!("Invalid input: {}", c)),
+            _ => bail!("Invalid input: {}", c),
         };
         grid[x[s]][y[s]] = true;
         s ^= 1;
